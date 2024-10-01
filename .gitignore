@@ -1,0 +1,5 @@
+/node_modules
+/recommendCock
+/denv
+
+.env
