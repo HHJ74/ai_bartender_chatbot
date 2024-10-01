@@ -2,7 +2,6 @@ import os
 import sys  # 한글 출력 인코딩에 사용
 import io  # 한글 출력 인코딩에 사용
 import openai  # OpenAI 라이브러리 사용
-from openai import OpenAI
 from dotenv import load_dotenv
 
 # 한글 출력 인코딩 설정 (콘솔 출력 시 한글 처리)
@@ -37,8 +36,6 @@ else:
 prompt = prompt_template.format(user_tasts=user_tasts)
 
 # OpenAI 모델을 사용하여 답변 생성
-
-client = OpenAI()
 
 response = openai.chat.completions.create(
     model="gpt-3.5-turbo",  # 사용할 모델 (gpt-4로 변경 가능)
