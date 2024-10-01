@@ -1,53 +1,56 @@
-name: Node.js CI/CD
+
+name: Node.js CI
+
 
 on:
   push:
     branches: ['main']
 
+
 jobs:
   build:
     runs-on: self-hosted
 
+
     strategy:
       matrix:
         node-version: [18.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
 
     steps:
       - uses: actions/checkout@v4
-      
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      
       - run: npm ci
-      
       - run: |
           touch .env
-          if [[ -n "${{ secrets.GOOGLE_API_KEY }}" ]]; then
-            echo "${{ secrets.GOOGLE_API_KEY }}" >> .env
-          fi
-          if [[ -n "${{ secrets.OPENAI_API_KEY }}" ]]; then
-            echo "${{ secrets.OPENAI_API_KEY }}" >> .env
-          fi
-      
+          echo "${{ secrets.GOOGLE_API_KEY }}" > .env
+          echo "${{ secrets.OPENAI_API_KEY }}" >> .env
+
+
+      # Set up Python environment
       - name: Set up Python 3.12.6
         uses: actions/setup-python@v4
         with:
           python-version: '3.12.6'
-      
-      - name: Cache Python dependencies
-        uses: actions/cache@v4
-        with:
-          path: venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-venv-
-      
-      - name: Set up and install Python dependencies
+
+
+      # Create and activate Python virtual environment
+      - name: Set up Python virtual environment
         run: |
           python -m venv venv
-          venv/bin/pip install -r requirements.txt || echo "No requirements.txt found"
-      
-      - run: pm2 reload BackendAPI
+          source venv/bin/activate
+
+
+      # Install Python dependencies (if you have a requirements.txt file)
+      - name: Install Python dependencies
+        run: |
+          source venv/bin/activate
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+
+      - run: pm2 restart BackendAPI
